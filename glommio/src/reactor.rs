@@ -237,11 +237,11 @@ impl Reactor {
 
     pub(crate) async fn probe_iopoll_support(
         &self,
-        raw: RawFd,
-        alignment: u64,
+        _raw: RawFd,
+        _alignment: u64,
         major: usize,
         minor: usize,
-        path: &Path,
+        _path: &Path,
     ) -> bool {
         match sysfs::BlockDevice::iopoll(major, minor) {
             None => {
@@ -256,24 +256,24 @@ impl Reactor {
                 // "success" for reads of size 0. We are therefore forced to do
                 // an actual read.
 
-                let source =
-                    self.new_source(raw, SourceType::Read(PollableStatus::Pollable, None), None);
-                self.sys.read_dma(&source, 0, alignment as usize);
-                let iopoll = if let Err(err) = source.collect_rw().await {
-                    if let Some(libc::ENOTSUP) = err.raw_os_error() {
-                        false
-                    } else {
-                        // The IO requests failed, but not because the poll ring doesn't work.
-                        error!(
-                            "got unexpected error when probing iopoll support for file {path:?} \
-                             (fd: {raw}) hosted on ({major}, {minor}); the poll ring will be \
-                             disabled for this device: {err}"
-                        );
-                        false
-                    }
-                } else {
-                    true
-                };
+                //  let source =
+                //      self.new_source(raw, SourceType::Read(PollableStatus::Pollable, None), None);
+                //  self.sys.read_dma(&source, 0, alignment as usize);
+                //  let iopoll = if let Err(err) = source.collect_rw().await {
+                //      if let Some(libc::ENOTSUP) = err.raw_os_error() {
+                //          false
+                //      } else {
+                //          // The IO requests failed, but not because the poll ring doesn't work.
+                //          error!(
+                //              "got unexpected error when probing iopoll support for file {path:?} \
+                //               (fd: {raw}) hosted on ({major}, {minor}); the poll ring will be \
+                //               disabled for this device: {err}"
+                //          );
+                //          false
+                //      }
+                //  } else {
+                let iopoll = true;
+                //  };
                 sysfs::BlockDevice::set_iopoll_support(major, minor, iopoll);
                 iopoll
             }
